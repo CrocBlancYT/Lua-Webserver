@@ -1,2 +1,0 @@
-lua main.lua
-pause
