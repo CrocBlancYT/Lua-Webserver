@@ -1,13 +1,9 @@
-local server = {}
+server = {}
 
 local socket = require('socket')
 
-local http = dofile('core/http/http.lua')
-local websocket = dofile('core/websocket/ws.lua')
-
-function server.import(utilityName)
-    return dofile('core/imports/' .. utilityName)
-end
+local http = http
+local websocket = websocket
 
 local function setTimeout(server, time) server.timeout = time end
 
@@ -247,5 +243,3 @@ init_request: table
 payload: string
 response: string
 ]]
-
-return server
