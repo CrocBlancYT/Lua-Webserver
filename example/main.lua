@@ -3,11 +3,15 @@
 dofile('server-pack.lua')
 local s = server
 
-local server, err = s.host('localhost:8000', 32)
+local server, err = s.host('localhost:8000', 0)
 server:setTimeout(10)
-
 print(server.server, err or '')
 print(server.url)
+
+local server2, err = s.host('localhost:8080', 0)
+server2:setTimeout(10)
+print(server2.server, err or '')
+print(server2.url)
 
 --http example
 local json = require('json')
@@ -42,4 +46,16 @@ websocket.onMessage = function (client, init_request, payload)
     return (payload or '(EMPTY PAYLOAD)')..' echo-ed'
 end
 
-while true do server:listen() end
+server2:serve('GET', '/', 'HTTP/1.1', function (client, request)
+    return {
+        headers = {
+            ['content-type'] = 'text/plain'
+        },
+        body = 'hallo'
+    }
+end)
+
+while true do
+    server:listen()
+    server2:listen()
+end

@@ -152,24 +152,24 @@ local function listener(server)
             end
         end
         
-        threads[tostring(client)] = thread
+        threads[client] = thread
         table.insert(sockets, client)
     end
 
     local function listen(server)
-        local ready_to_read = socket.select(server.sockets)
+        local ready_to_read = socket.select(server.sockets, nil, server.selecttimeout)
 
         for _, socket in ipairs(ready_to_read) do
             if socket == server.server then
                 local client = server.server:accept()
 
-                local timeout = server.timeout
+                local timeout = server.clienttimeout
                 if timeout then client:settimeout(server.timeout) end
 
                 print('     new client')
                 new_thread(client)
             else
-                local thread = threads[tostring(socket)]
+                local thread = threads[socket]
                 thread.resume()
             end
         end
@@ -180,7 +180,7 @@ end
 
 local function close(server) server.server:close() end
 
-function server.host(host, backlog)
+function server.host(host, selectiontimeout, clienttimeout) -- backlog not implemented
     local _, _, ip, port = string.find(host, '^(.*):(.-)$')
 
     if ip == '*' then
@@ -191,7 +191,8 @@ function server.host(host, backlog)
 
     local handle = {
         server = server,
-        timeout = false,
+        selecttimeout = selectiontimeout,
+        clienttimeout = clienttimeout,
 
         sockets = {server},
         serves = {},
